@@ -1,17 +1,7 @@
+#include "camera.h"
 #include "raylib.h"
 #include "raymath.h"
 #include <stdio.h>
-
-Camera3D GetCamera(void) {
-  Camera3D camera = {0};
-  camera.position = (Vector3){45.0f, 45.0f, 45.0f};
-  camera.target = (Vector3){0};
-  camera.up = (Vector3){0.0f, 1.0f, 0.0f};
-  camera.fovy = 75.0f;
-  camera.projection = CAMERA_ORTHOGRAPHIC;
-
-  return camera;
-}
 
 Vector3 HandleInput(float size) {
   int key = GetKeyPressed();
@@ -38,20 +28,17 @@ int main(void) {
   SetTargetFPS(60);
 
   Vector3 pos = {5, 5, 5};
-  Camera3D camera = GetCamera();
 
   while (!WindowShouldClose()) {
     BeginDrawing();
-    ClearBackground(WHITE);
-    BeginMode3D(camera);
-
-    UpdateCamera(&camera, CAMERA_FREE);
+    ClearBackground(BLANK);
+    Begin3D();
 
     pos = Vector3Add(pos, HandleInput(10));
     DrawGrid(40, 10);
-    DrawCube(pos, 10, 10, 10, BLACK);
+    DrawCube(pos, 10, 10, 10, WHITE);
 
-    EndMode3D();
+    End3D();
     EndDrawing();
   }
 
