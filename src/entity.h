@@ -5,6 +5,6 @@ typedef struct{
   Model model;
   Vector3 pos;
   BoundingBox bbox;
-}plr_player; 
+}ent_entity;
 
-extern void plr_move(plr_player *p, int key);
+extern void ent_move(ent_entity *p, int key);

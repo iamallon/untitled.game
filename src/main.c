@@ -1,5 +1,5 @@
 #include "camera.h"
-#include "player.h"
+#include "entity.h"
 #include "raylib.h"
 #include "raymath.h"
 #include <stdio.h>
@@ -12,12 +12,12 @@ int main(void) {
   bbox.min = Vector3Scale(bbox.min, 2.0f);
   bbox.max = Vector3Scale(bbox.max, 2.0f);
 
-  plr_player player = {model, (Vector3){5, 5, 5}, bbox};
+  ent_entity player = {model, (Vector3){5, 5, 5}, bbox};
 
   while (!WindowShouldClose()) {
     cam_begin();
 
-    plr_move(&player, GetKeyPressed());
+    ent_move(&player, GetKeyPressed());
     DrawModel(player.model, player.pos, 1.0f, WHITE);
     DrawBoundingBox(player.bbox, RED);
     DrawGrid(40, 10);

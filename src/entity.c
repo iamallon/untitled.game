@@ -1,8 +1,8 @@
-#include "player.h"
+#include "entity.h"
 
 static float step = 10.0f;
 
-void plr_move(plr_player *p, int key) {
+void ent_move(ent_entity *p, int key) {
   if (key == 0) {
     return;
   }
