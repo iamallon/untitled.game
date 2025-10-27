@@ -1,45 +1,27 @@
 #include "camera.h"
+#include "player.h"
 #include "raylib.h"
 #include "raymath.h"
 #include <stdio.h>
 
-Vector3 HandleInput(float size) {
-  int key = GetKeyPressed();
-  if (key != 0) {
-    if (key == KEY_RIGHT) {
-      return (Vector3){0, 0, size};
-    }
-    if (key == KEY_LEFT) {
-      return (Vector3){0, 0, -size};
-    }
-    if (key == KEY_UP) {
-      return (Vector3){size, 0, 0};
-    }
-    if (key == KEY_DOWN) {
-      return (Vector3){-size, 0, 0};
-    }
-  }
-
-  return (Vector3){0};
-}
-
 int main(void) {
   InitWindow(1280, 720, "untitled.game");
   SetTargetFPS(60);
+  Model model = LoadModelFromMesh(GenMeshCube(10, 10, 10));
+  BoundingBox bbox = GetModelBoundingBox(model);
+  bbox.min = Vector3Scale(bbox.min, 2.0f);
+  bbox.max = Vector3Scale(bbox.max, 2.0f);
 
-  Vector3 pos = {5, 5, 5};
+  plr_player player = {model, (Vector3){5, 5, 5}, bbox};
 
   while (!WindowShouldClose()) {
-    BeginDrawing();
-    ClearBackground(BLANK);
-    Begin3D();
+    cam_begin();
 
-    pos = Vector3Add(pos, HandleInput(10));
+    plr_move(&player, GetKeyPressed());
+    DrawModel(player.model, player.pos, 1.0f, WHITE);
+    DrawBoundingBox(player.bbox, RED);
     DrawGrid(40, 10);
-    DrawCube(pos, 10, 10, 10, WHITE);
-
-    End3D();
-    EndDrawing();
+    cam_end();
   }
 
   CloseWindow();

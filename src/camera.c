@@ -4,7 +4,7 @@
 
 static Camera3D camera = {0};
 
-void SetCamera(void) {
+void init(void) {
   camera.position = (Vector3){200.0f, 200.0f, 200.0f};
   camera.target = (Vector3){0};
   camera.up = (Vector3){0.0f, 1.0f, 0.0f};
@@ -12,9 +12,15 @@ void SetCamera(void) {
   camera.projection = CAMERA_ORTHOGRAPHIC;
 }
 
-void Begin3D(void) {
-  SetCamera();
+void cam_begin(void) {
+  init();
+  BeginDrawing();
+  ClearBackground(BLANK);
   BeginMode3D(camera);
 }
 
-void End3D(void) { EndMode3D(); }
+void cam_end(void) {
+  EndMode3D();
+  DrawFPS(10, 10);
+  EndDrawing();
+}

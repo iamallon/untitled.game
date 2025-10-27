@@ -3,10 +3,13 @@ CFLAGS = -I/opt/homebrew/Cellar/raylib/5.5/include -L/opt/homebrew/Cellar/raylib
 
 all: untitled.game.a
 
-untitled.game.a: main.o camera.o
+untitled.game.a: main.o camera.o player.o
 	$(CC) $(CFLAGS) -o $@ $^
 
 camera.o: camera.c camera.h
+	$(CC) -I/opt/homebrew/Cellar/raylib/5.5/include -o $@ -c $<
+
+player.o: player.c player.h
 	$(CC) -I/opt/homebrew/Cellar/raylib/5.5/include -o $@ -c $<
 
 main.o: main.c
