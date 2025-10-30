@@ -14,6 +14,12 @@ typedef struct {
   Model *models;
 } PlaneView;
 
+typedef struct {
+  int rowSize;
+  int columnSize;
+  float *heights;
+} HeightMap;
+
 static PlaneView GeneratePlaneView(void) {
   PlaneView p = {0};
   p.rowSize = ROW_SIZE;
@@ -34,27 +40,34 @@ static PlaneView GeneratePlaneView(void) {
   return p;
 }
 
-void DrawPlaneView(PlaneView plane, float *mapHeight) {
+// Careful with offsetX and offsetY. Needs clamping;
+void DrawPlaneView(PlaneView plane, HeightMap map, int offsetX, int offsetY) {
   for (int i = 0; i < plane.rowSize; i++) {
     for (int j = 0; j < plane.columnSize; j++) {
       Model *m = &plane.models[i * plane.columnSize + j];
-      float height = mapHeight[i * plane.columnSize + j];
+      float height =
+          map.heights[(i + offsetY * plane.columnSize) * plane.columnSize +
+                      (j + offsetX * plane.rowSize)];
       m->transform.m13 = Lerp(m->transform.m13, height, 0.1f);
       DrawModelWires(*m, ORIGIN, 1.0f, WHITE);
     }
   }
 }
 
-float *GetHeightMap(int rowSize, int columnSize) {
-  float *height = calloc(rowSize * columnSize, sizeof(float));
+HeightMap GetHeightMap(int rowSize, int columnSize) {
+  HeightMap m = {0};
+  m.rowSize = rowSize;
+  m.columnSize = columnSize;
+  m.heights = calloc(rowSize * columnSize, sizeof(float));
 
   for (int i = 0; i < rowSize; i++) {
     for (int j = 0; j < columnSize; j++) {
-      height[i * columnSize + j] = (float)GetRandomValue(-200, 200) / 1000.0f;
+      m.heights[i * columnSize + j] =
+          (float)GetRandomValue(-200, 200) / 1000.0f;
     }
   }
 
-  return height;
+  return m;
 }
 
 int main(void) {
@@ -62,7 +75,7 @@ int main(void) {
   SetTargetFPS(60);
 
   PlaneView plane = GeneratePlaneView();
-  float *heightMap = GetHeightMap(plane.rowSize, plane.columnSize);
+  HeightMap map = GetHeightMap(plane.rowSize, plane.columnSize);
 
   Camera3D camera = {0};
   camera.position = (Vector3){-10.0f, 10.0f, 10.0f};
@@ -71,18 +84,32 @@ int main(void) {
   camera.fovy = 15.0f;
   camera.projection = CAMERA_ORTHOGRAPHIC;
 
+  Vector2 offset = {0};
+  char offsetTextBuf[60];
+
   while (!WindowShouldClose()) {
     BeginDrawing();
     ClearBackground(BLANK);
     BeginMode3D(camera);
-    if (IsKeyDown(KEY_SPACE)) {
-      heightMap = GetHeightMap(plane.rowSize, plane.columnSize);
+    if (IsKeyPressed(KEY_DOWN)) {
+      offset.y = Clamp(offset.y + 1, 0, map.rowSize);
     }
-    DrawPlaneView(plane, heightMap);
+    if (IsKeyPressed(KEY_UP)) {
+      offset.y = Clamp(offset.y - 1, 0, map.rowSize);
+    }
+    if (IsKeyPressed(KEY_RIGHT)) {
+      offset.x = Clamp(offset.x + 1, 0, map.columnSize);
+    }
+    if (IsKeyPressed(KEY_LEFT)) {
+      offset.x = Clamp(offset.x - 1, 0, map.columnSize);
+    }
+    DrawPlaneView(plane, map, offset.x, offset.y);
     // UpdateCamera(&camera, CAMERA_FREE);
 
+    sprintf(offsetTextBuf, "X: %f Y: %f", offset.x, offset.y);
     EndMode3D();
     DrawFPS(10, 10);
+    DrawText(offsetTextBuf, 10, 50, 10, WHITE);
     EndDrawing();
   }
 
