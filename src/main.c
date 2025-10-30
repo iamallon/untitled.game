@@ -25,7 +25,8 @@ static PlaneView GeneratePlaneView(void) {
       p.models[i * p.columnSize + j] = LoadModelFromMesh(GenMeshCube(1, 1, 1));
       Matrix t =
           MatrixTranslate(-(p.columnSize / 2) + j, 0, -(p.rowSize / 2) + i);
-      Matrix s = MatrixScale(0.3f, 0.3f, 0.3f);
+      Matrix s = MatrixScale(1.0f, 1.0f, 1.0f);
+      // Matrix mult is not commutative. Careful with transforms...
       p.models[i * p.columnSize + j].transform = MatrixMultiply(t, s);
     }
   }
@@ -33,15 +34,27 @@ static PlaneView GeneratePlaneView(void) {
   return p;
 }
 
-void DrawPlaneView(PlaneView plane, int *mapHeight) {
+void DrawPlaneView(PlaneView plane, float *mapHeight) {
   for (int i = 0; i < plane.rowSize; i++) {
     for (int j = 0; j < plane.columnSize; j++) {
       Model *m = &plane.models[i * plane.columnSize + j];
-      int height = mapHeight[i * plane.columnSize + j];
-      m->transform.m13 = Lerp(m->transform.m13, height, 0.001f);
+      float height = mapHeight[i * plane.columnSize + j];
+      m->transform.m13 = Lerp(m->transform.m13, height, 0.1f);
       DrawModelWires(*m, ORIGIN, 1.0f, WHITE);
     }
   }
+}
+
+float *GetHeightMap(int rowSize, int columnSize) {
+  float *height = calloc(rowSize * columnSize, sizeof(float));
+
+  for (int i = 0; i < rowSize; i++) {
+    for (int j = 0; j < columnSize; j++) {
+      height[i * columnSize + j] = (float)GetRandomValue(-200, 200) / 1000.0f;
+    }
+  }
+
+  return height;
 }
 
 int main(void) {
@@ -49,27 +62,23 @@ int main(void) {
   SetTargetFPS(60);
 
   PlaneView plane = GeneratePlaneView();
-
-  int height[plane.rowSize * plane.columnSize];
-  for (int i = 0; i < plane.rowSize; i++) {
-    for (int j = 0; j < plane.columnSize; j++) {
-      height[i * plane.columnSize + j] = GetRandomValue(-2, 2);
-    }
-  }
+  float *heightMap = GetHeightMap(plane.rowSize, plane.columnSize);
 
   Camera3D camera = {0};
   camera.position = (Vector3){-10.0f, 10.0f, 10.0f};
   camera.target = (Vector3){0};
   camera.up = (Vector3){0.0f, 1.0f, 0.0f};
-  camera.fovy = 5.0f;
+  camera.fovy = 15.0f;
   camera.projection = CAMERA_ORTHOGRAPHIC;
 
   while (!WindowShouldClose()) {
     BeginDrawing();
     ClearBackground(BLANK);
     BeginMode3D(camera);
-
-    DrawPlaneView(plane, height);
+    if (IsKeyDown(KEY_SPACE)) {
+      heightMap = GetHeightMap(plane.rowSize, plane.columnSize);
+    }
+    DrawPlaneView(plane, heightMap);
     // UpdateCamera(&camera, CAMERA_FREE);
 
     EndMode3D();
