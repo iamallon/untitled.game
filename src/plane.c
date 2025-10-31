@@ -12,11 +12,7 @@ PlaneView GeneratePlaneView(int rowSize, int columnSize) {
   for (int i = 0; i < p.rowSize; i++) {
     for (int j = 0; j < p.columnSize; j++) {
       p.models[i * p.columnSize + j] = LoadModelFromMesh(GenMeshCube(1, 1, 1));
-      Matrix t =
-          MatrixTranslate(-(p.columnSize / 2) + j, 0, -(p.rowSize / 2) + i);
-      Matrix s = MatrixScale(1.0f, 1.0f, 1.0f);
-      // Matrix mult is not commutative. Careful with transforms...
-      p.models[i * p.columnSize + j].transform = MatrixMultiply(t, s);
+      p.models[i * p.columnSize + j].transform = MatrixTranslate(j, 0, i);
     }
   }
 
@@ -25,16 +21,35 @@ PlaneView GeneratePlaneView(int rowSize, int columnSize) {
 
 // There is a  buffer overflow here for the HeightMap
 // because of the offsetX and offsetY;
-void DrawPlaneView(PlaneView plane, HeightMap map, int offsetX, int offsetY) {
-  for (int i = 0; i < plane.rowSize; i++) {
-    for (int j = 0; j < plane.columnSize; j++) {
-      Model *m = &plane.models[i * plane.columnSize + j];
-      float height =
-          map.heights[((i + offsetY) * plane.columnSize) + j + offsetX];
+void DrawPlaneView(PlaneView *plane, HeightMap map) {
+  for (int i = 0; i < plane->rowSize; i++) {
+    for (int j = 0; j < plane->columnSize; j++) {
+      Model *m = &plane->models[i * plane->columnSize + j];
+      // float height = map.heights[((i + plane->offset.row) *
+      // plane->columnSize) + j + plane->offset.column];
+      float height = GetHeightFromMap(map, plane->offset, i, j);
       m->transform.m13 = Lerp(m->transform.m13, height, 0.1f);
-      DrawModelWires(*m, ORIGIN, 1.0f, WHITE);
+      DrawBoundingBox(GetModelBoundingBox(*m), RED);
     }
   }
+}
+
+RayCollision GetPlaneCollision(PlaneView plane, Vector3 origin) {
+  Ray ray = {0};
+  ray.position = origin;
+  ray.direction = VECTOR_DOWN;
+  DrawRay(ray, RED);
+  for (int i = 0; i < plane.rowSize; i++) {
+    for (int j = 0; j < plane.columnSize; j++) {
+      RayCollision col = GetRayCollisionBox(
+          ray, GetModelBoundingBox(plane.models[i * plane.columnSize + j]));
+      if (col.hit) {
+        return col;
+      }
+    }
+  }
+
+  return (RayCollision){0};
 }
 
 HeightMap GetHeightMap(int rowSize, int columnSize) {
@@ -51,4 +66,11 @@ HeightMap GetHeightMap(int rowSize, int columnSize) {
   }
 
   return m;
+}
+
+float GetHeightFromMap(HeightMap map, Offset offset, int row, int column) {
+  row = Clamp(row, 0, map.columnSize);
+  column = Clamp(column, 0, map.rowSize);
+  return map
+      .heights[(row + offset.row) * map.columnSize + column + offset.column];
 }
