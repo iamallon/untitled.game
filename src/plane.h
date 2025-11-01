@@ -30,7 +30,8 @@ typedef struct {
   Model tile;
 } PlaneCollision;
 
-extern PlaneView GeneratePlaneView(int rowSize, int columnSize);
+extern PlaneView GeneratePlaneView(int rowSize, int columnSize,
+                                   Texture texture);
 extern void DrawPlaneView(PlaneView *plane, HeightMap map);
 extern HeightMap GetHeightMap(int rowSize, int columnSize);
 extern float GetHeightFromMap(HeightMap map, Offset offset, int row,

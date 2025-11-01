@@ -3,16 +3,17 @@
 #include "raymath.h"
 #include <stdlib.h>
 
-PlaneView GeneratePlaneView(int rowSize, int columnSize) {
+PlaneView GeneratePlaneView(int rowSize, int columnSize, Texture texture) {
   PlaneView p = {0};
   p.rowSize = rowSize;
   p.columnSize = columnSize;
   p.models = calloc(p.rowSize * p.columnSize, sizeof(Model));
-
   for (int i = 0; i < p.rowSize; i++) {
     for (int j = 0; j < p.columnSize; j++) {
       p.models[i * p.columnSize + j] = LoadModelFromMesh(GenMeshCube(1, 1, 1));
       p.models[i * p.columnSize + j].transform = MatrixTranslate(j, 0, i);
+      SetMaterialTexture(&p.models[i * p.columnSize + j].materials[0],
+                         MATERIAL_MAP_DIFFUSE, texture);
     }
   }
 
@@ -29,7 +30,7 @@ void DrawPlaneView(PlaneView *plane, HeightMap map) {
 
       // Apply transform on Y axis.
       m->transform.m13 = Lerp(m->transform.m13, height, 0.1f);
-      DrawBoundingBox(GetModelBoundingBox(*m), RED);
+      DrawModel(*m, ORIGIN, 1.0f, WHITE);
     }
   }
 }

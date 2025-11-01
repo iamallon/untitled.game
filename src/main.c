@@ -40,9 +40,12 @@ int main(void) {
              "untitled.game");
   SetTargetFPS(GetMonitorRefreshRate(currentMonitor));
 
-  Model player = LoadModelFromMesh(GenMeshSphere(0.8f, 20, 20));
+  Image image = LoadImage("../res/tiles.jpg");
+  Texture2D texture = LoadTextureFromImage(image);
+
+  Model player = LoadModelFromMesh(GenMeshSphere(0.3f, 20, 20));
   player.transform = MatrixTranslate(0, 10, 0);
-  PlaneView plane = GeneratePlaneView(VIEW_ROWS, VIEW_COLUMNS);
+  PlaneView plane = GeneratePlaneView(VIEW_ROWS, VIEW_COLUMNS, texture);
   HeightMap map = GetHeightMap(200, 200);
 
   Camera3D camera = {0};
