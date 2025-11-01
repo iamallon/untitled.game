@@ -40,8 +40,6 @@ PlaneCollision GetPlaneCollision(PlaneView plane, Vector3 origin) {
   ray.position = origin;
   ray.direction = VECTOR_DOWN;
 
-  DrawRay(ray, RED);
-
   for (int i = 0; i < plane.rowSize; i++) {
     for (int j = 0; j < plane.columnSize; j++) {
       Model tile = plane.models[i * plane.columnSize + j];

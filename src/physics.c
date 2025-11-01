@@ -8,13 +8,33 @@
 #define GRAVITY 9.8f
 #define SPRING_FORCE 1.4f
 #define CAR_VELOCITY 3.0f
+#define ROTATION_SPEED 5.0f
 
 static Vector3 GetPosition(Matrix m) { return (Vector3){m.m12, m.m13, m.m14}; }
+
+static Matrix RotateInPlaceZ(Matrix m, float deg) {
+  // Translate to origin (0,0,0).
+  Vector3 oldTranslate = GetPosition(m);
+  Matrix result = MatrixMultiply(
+      m, MatrixTranslate(-oldTranslate.x, -oldTranslate.y, -oldTranslate.z));
+
+  // Rotate in regards to origin.
+  result = MatrixMultiply(result, MatrixRotateZ(DEG2RAD * deg));
+
+  // Translate back to original point.
+  result = MatrixMultiply(
+      result, MatrixTranslate(oldTranslate.x, oldTranslate.y, oldTranslate.z));
+
+  return result;
+}
 
 static Matrix GetWheelMatrixTranslate(PlaneView p, Model m) {
   PlaneCollision col = GetPlaneCollision(p, GetPosition(m.transform));
   float highTile = GetModelBoundingBox(col.tile).max.y;
-  float lowModel = GetModelBoundingBox(m).min.y;
+
+  // Wheel is rotated and bounding box is not working.
+  // FIX THIS ASAP. THIS ASSUMES A RADIUS FOR THE WHEEL OF 0.4f;
+  float lowModel = m.transform.m13 - 0.4f;
 
   // This means we rest on the tile.
   if (fabs(highTile - lowModel) < 0.05f) {
@@ -59,19 +79,27 @@ void ApplyCarInput(PlaneView p, Car *c) {
     Matrix move = MatrixTranslate(-CAR_VELOCITY * GetFrameTime(), 0, 0);
 
     c->body.transform = MatrixMultiply(c->body.transform, move);
-    c->wheels[0].transform = MatrixMultiply(c->wheels[0].transform, move);
-    c->wheels[1].transform = MatrixMultiply(c->wheels[1].transform, move);
-    c->wheels[2].transform = MatrixMultiply(c->wheels[2].transform, move);
-    c->wheels[3].transform = MatrixMultiply(c->wheels[3].transform, move);
+    c->wheels[0].transform = MatrixMultiply(
+        RotateInPlaceZ(c->wheels[0].transform, ROTATION_SPEED), move);
+    c->wheels[1].transform = MatrixMultiply(
+        RotateInPlaceZ(c->wheels[1].transform, ROTATION_SPEED), move);
+    c->wheels[2].transform = MatrixMultiply(
+        RotateInPlaceZ(c->wheels[2].transform, ROTATION_SPEED), move);
+    c->wheels[3].transform = MatrixMultiply(
+        RotateInPlaceZ(c->wheels[3].transform, ROTATION_SPEED), move);
   }
 
   if (IsKeyDown(KEY_L)) {
     Matrix move = MatrixTranslate(CAR_VELOCITY * GetFrameTime(), 0, 0);
 
     c->body.transform = MatrixMultiply(c->body.transform, move);
-    c->wheels[0].transform = MatrixMultiply(c->wheels[0].transform, move);
-    c->wheels[1].transform = MatrixMultiply(c->wheels[1].transform, move);
-    c->wheels[2].transform = MatrixMultiply(c->wheels[2].transform, move);
-    c->wheels[3].transform = MatrixMultiply(c->wheels[3].transform, move);
+    c->wheels[0].transform = MatrixMultiply(
+        RotateInPlaceZ(c->wheels[0].transform, ROTATION_SPEED), move);
+    c->wheels[1].transform = MatrixMultiply(
+        RotateInPlaceZ(c->wheels[1].transform, ROTATION_SPEED), move);
+    c->wheels[2].transform = MatrixMultiply(
+        RotateInPlaceZ(c->wheels[2].transform, ROTATION_SPEED), move);
+    c->wheels[3].transform = MatrixMultiply(
+        RotateInPlaceZ(c->wheels[3].transform, ROTATION_SPEED), move);
   }
 }
