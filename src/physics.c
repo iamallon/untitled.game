@@ -23,12 +23,12 @@ static Matrix GetWheelMatrixTranslate(PlaneView p, Model m) {
 
   // If there is a gap make the object fall.
   if (col.collision.hit && highTile < lowModel) {
-    return MatrixTranslate(0, -SPRING_FORCE * CAR_VELOCITY * GetFrameTime(), 0);
+    return MatrixTranslate(0, -SPRING_FORCE * GetFrameTime() * 0.7f, 0);
   }
 
   // If there is a bump make the object rise slightly.
   if (col.collision.hit && highTile > lowModel) {
-    return MatrixTranslate(0, SPRING_FORCE * CAR_VELOCITY * GetFrameTime(), 0);
+    return MatrixTranslate(0, SPRING_FORCE * GetFrameTime() * 0.7f, 0);
   }
 
   return MatrixIdentity();
