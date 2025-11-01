@@ -10,9 +10,9 @@
 Vector3 GetPosition(Matrix m) { return (Vector3){m.m12, m.m13, m.m14}; }
 
 void ApplyPhysics(PlaneView p, Model *m) {
-  RayCollision collision = GetPlaneCollision(p, GetPosition(m->transform));
+  PlaneCollision col = GetWheelPlaneCollision(p, GetPosition(m->transform));
 
-  if (collision.hit && collision.distance > 0.8f) {
+  if (col.collision.hit && col.collision.distance > 0.8f) {
     m->transform = MatrixMultiply(
         m->transform, MatrixTranslate(0, -GRAVITY * GetFrameTime(), 0));
   }
@@ -24,7 +24,7 @@ int main(void) {
              "untitled.game");
   SetTargetFPS(GetMonitorRefreshRate(currentMonitor));
 
-  Model player = LoadModelFromMesh(GenMeshSphere(0.1f, 20, 20));
+  Model player = LoadModelFromMesh(GenMeshSphere(0.8f, 20, 20));
   player.transform = MatrixTranslate(0, 10, 0);
   PlaneView plane = GeneratePlaneView(VIEW_ROWS, VIEW_COLUMNS);
   HeightMap map = GetHeightMap(200, 200);
@@ -76,8 +76,8 @@ int main(void) {
     }
 
     DrawModelWires(player, ORIGIN, 1.0f, WHITE);
-    RayCollision collision =
-        GetPlaneCollision(plane, GetPosition(player.transform));
+    PlaneCollision col =
+        GetWheelPlaneCollision(plane, GetPosition(player.transform));
 
     ApplyPhysics(plane, &player);
 
@@ -88,15 +88,15 @@ int main(void) {
     DrawFPS(10, 10);
     DrawText(TextFormat("X: %d Y: %d", plane.offset.column, plane.offset.row),
              10, 50, 50, WHITE);
-    DrawText(TextFormat("Distance: %f, X: %f, Z: %f", collision.distance,
-                        collision.point.x, collision.point.z),
+    DrawText(TextFormat("Distance: %f, X: %f, Z: %f", col.collision.distance,
+                        col.collision.point.x, col.collision.point.z),
              10, 100, 50, WHITE);
     DrawText(TextFormat("Player: X:%f, Y:%f, Z:%f", player.transform.m12,
                         player.transform.m13, player.transform.m14),
              10, 150, 50, WHITE);
-    DrawText(TextFormat("Height: %f",
-                        GetHeightFromMap(map, plane.offset, collision.point.z,
-                                         collision.point.x)),
+    DrawText(TextFormat("Height: %f", GetHeightFromMap(map, plane.offset,
+                                                       col.collision.point.z,
+                                                       col.collision.point.x)),
              10, 200, 50, WHITE);
     EndDrawing();
   }

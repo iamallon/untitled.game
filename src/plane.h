@@ -24,11 +24,16 @@ typedef struct {
   float *heights;
 } HeightMap;
 
+typedef struct {
+  RayCollision collision;
+  Model tile;
+} PlaneCollision;
+
 extern PlaneView GeneratePlaneView(int rowSize, int columnSize);
 extern void DrawPlaneView(PlaneView *plane, HeightMap map);
 extern HeightMap GetHeightMap(int rowSize, int columnSize);
 extern float GetHeightFromMap(HeightMap map, Offset offset, int row,
                               int column);
-extern RayCollision GetPlaneCollision(PlaneView pv, Vector3 origin);
+extern PlaneCollision GetWheelPlaneCollision(PlaneView pv, Vector3 origin);
 
 #endif
