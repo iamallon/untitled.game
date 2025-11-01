@@ -36,6 +36,6 @@ extern void DrawPlaneView(PlaneView *plane, HeightMap map);
 extern HeightMap GetHeightMap(int rowSize, int columnSize);
 extern float GetHeightFromMap(HeightMap map, Offset offset, int row,
                               int column);
-extern PlaneCollision GetWheelPlaneCollision(PlaneView pv, Vector3 origin);
+extern PlaneCollision GetPlaneCollision(PlaneView pv, Vector3 origin);
 
 #endif

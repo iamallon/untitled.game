@@ -5,7 +5,7 @@ LDLIBS = -lraylib
 
 all: untitled.game.a
 
-untitled.game.a: main.o plane.o
+untitled.game.a: main.o plane.o car.o physics.o
 	$(CC) $(CFLAGS) $(LDFLAGS) $(LDLIBS) -o $@ $^
 
 main.o: main.c
@@ -14,5 +14,11 @@ main.o: main.c
 plane.o: plane.c plane.h
 	$(CC) $(CFLAGS) -o $@ -c $<
 
+physics.o: physics.c physics.h
+	$(CC) $(CFLAGS) -o $@ -c $<
+
+car.o: car.c car.h
+	$(CC) $(CFLAGS) -o $@ -c $<
+
 clean:
-	rm -f untitled.game.a main.o plane.o
+	rm -f untitled.game.a main.o plane.o physics.o car.o

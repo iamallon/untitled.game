@@ -35,7 +35,7 @@ void DrawPlaneView(PlaneView *plane, HeightMap map) {
   }
 }
 
-PlaneCollision GetWheelPlaneCollision(PlaneView plane, Vector3 origin) {
+PlaneCollision GetPlaneCollision(PlaneView plane, Vector3 origin) {
   Ray ray = {0};
   ray.position = origin;
   ray.direction = VECTOR_DOWN;

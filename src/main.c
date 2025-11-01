@@ -1,38 +1,12 @@
+#include "car.h"
+#include "physics.h"
 #include "plane.h"
 #include "raylib.h"
 #include "raymath.h"
-#include <math.h>
 
 #define VIEW_ROWS 16
 #define VIEW_COLUMNS 16
 #define PLAYER_VELOCITY 3.0f
-
-Vector3 GetPosition(Matrix m) { return (Vector3){m.m12, m.m13, m.m14}; }
-
-void ApplyPhysics(PlaneView p, Model *m) {
-  PlaneCollision col = GetWheelPlaneCollision(p, GetPosition(m->transform));
-  float highTile = GetModelBoundingBox(col.tile).max.y;
-  float lowModel = GetModelBoundingBox(*m).min.y;
-
-  // This means we rest on the tile.
-  if (fabs(highTile - lowModel) < 0.01f) {
-    return;
-  }
-
-  // If there is a gap make the object fall.
-  if (col.collision.hit && highTile < lowModel) {
-    m->transform = MatrixMultiply(
-        m->transform, MatrixTranslate(0, -2.0f * GetFrameTime(), 0));
-    return;
-  }
-
-  // If there is a bumo make the object rise slightly.
-  if (col.collision.hit && highTile > lowModel) {
-    m->transform = MatrixMultiply(m->transform,
-                                  MatrixTranslate(0, 1.0f * GetFrameTime(), 0));
-    return;
-  }
-}
 
 int main(void) {
   int currentMonitor = GetCurrentMonitor();
@@ -43,10 +17,10 @@ int main(void) {
   Image image = LoadImage("../res/tiles.jpg");
   Texture2D texture = LoadTextureFromImage(image);
 
-  Model player = LoadModelFromMesh(GenMeshSphere(0.3f, 20, 20));
-  player.transform = MatrixTranslate(0, 10, 0);
   PlaneView plane = GeneratePlaneView(VIEW_ROWS, VIEW_COLUMNS, texture);
   HeightMap map = GetHeightMap(200, 200);
+
+  Car car = GenerateCar(LoadModelFromMesh(GenMeshCube(1, 1, 1)));
 
   Camera3D camera = {0};
   camera.position = (Vector3){-10.0f, 10.0f, 10.0f};
@@ -73,50 +47,15 @@ int main(void) {
       plane.offset.column = Clamp(plane.offset.column - 1, 0, map.columnSize);
     }
 
-    if (IsKeyDown(KEY_K)) {
-      player.transform = MatrixMultiply(
-          player.transform,
-          MatrixTranslate(0, 0, -PLAYER_VELOCITY * GetFrameTime()));
-    }
-    if (IsKeyDown(KEY_J)) {
-      player.transform = MatrixMultiply(
-          player.transform,
-          MatrixTranslate(0, 0, PLAYER_VELOCITY * GetFrameTime()));
-    }
-    if (IsKeyDown(KEY_H)) {
-      player.transform = MatrixMultiply(
-          player.transform,
-          MatrixTranslate(-PLAYER_VELOCITY * GetFrameTime(), 0, 0));
-    }
-    if (IsKeyDown(KEY_L)) {
-      player.transform = MatrixMultiply(
-          player.transform,
-          MatrixTranslate(PLAYER_VELOCITY * GetFrameTime(), 0, 0));
-    }
-
-    DrawModelWires(player, ORIGIN, 1.0f, WHITE);
-    PlaneCollision col =
-        GetWheelPlaneCollision(plane, GetPosition(player.transform));
-
-    ApplyPhysics(plane, &player);
-
+    DrawCar(car);
     DrawPlaneView(&plane, map);
+    ApplyCarPhysics(plane, &car);
+    ApplyCarInput(plane, &car);
+
     UpdateCamera(&camera, CAMERA_FREE);
 
     EndMode3D();
     DrawFPS(10, 10);
-    DrawText(TextFormat("X: %d Y: %d", plane.offset.column, plane.offset.row),
-             10, 50, 50, WHITE);
-    DrawText(TextFormat("Distance: %f, X: %f, Z: %f", col.collision.distance,
-                        col.collision.point.x, col.collision.point.z),
-             10, 100, 50, WHITE);
-    DrawText(TextFormat("Player: X:%f, Y:%f, Z:%f", player.transform.m12,
-                        player.transform.m13, player.transform.m14),
-             10, 150, 50, WHITE);
-    DrawText(TextFormat("Height: %f", GetHeightFromMap(map, plane.offset,
-                                                       col.collision.point.z,
-                                                       col.collision.point.x)),
-             10, 200, 50, WHITE);
     EndDrawing();
   }
 
