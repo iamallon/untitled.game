@@ -12,6 +12,45 @@
 
 static Vector3 GetPosition(Matrix m) { return (Vector3){m.m12, m.m13, m.m14}; }
 
+static BoundingBox GetRotationAwareModelBoundingBox(Model model) {
+  Mesh mesh = model.meshes[0];
+  float *vertices = mesh.vertices;
+  int vertexCount = mesh.vertexCount;
+
+  BoundingBox bb = {0};
+  Vector3 v = {vertices[0], vertices[1], vertices[2]};
+
+  v = Vector3Transform(v, model.transform);
+
+  bb.min = v;
+  bb.max = v;
+
+  for (int i = 0; i < vertexCount * 3; i += 3) {
+    float x = vertices[i];
+    float y = vertices[i + 1];
+    float z = vertices[i + 2];
+
+    Vector3 vtx = {x, y, z};
+    vtx = Vector3Transform(vtx, model.transform);
+
+    if (vtx.x < bb.min.x)
+      bb.min.x = vtx.x;
+    if (vtx.y < bb.min.y)
+      bb.min.y = vtx.y;
+    if (vtx.z < bb.min.z)
+      bb.min.z = vtx.z;
+
+    if (vtx.x > bb.max.x)
+      bb.max.x = vtx.x;
+    if (vtx.y > bb.max.y)
+      bb.max.y = vtx.y;
+    if (vtx.z > bb.max.z)
+      bb.max.z = vtx.z;
+  }
+
+  return bb;
+}
+
 static Matrix RotateInPlaceZ(Matrix m, float deg) {
   // Translate to origin (0,0,0).
   Vector3 oldTranslate = GetPosition(m);
@@ -31,10 +70,8 @@ static Matrix RotateInPlaceZ(Matrix m, float deg) {
 static Matrix GetWheelMatrixTranslate(PlaneView p, Model m) {
   PlaneCollision col = GetPlaneCollision(p, GetPosition(m.transform));
   float highTile = GetModelBoundingBox(col.tile).max.y;
-
-  // Wheel is rotated and bounding box is not working.
-  // FIX THIS ASAP. THIS ASSUMES A RADIUS FOR THE WHEEL OF 0.4f;
-  float lowModel = m.transform.m13 - 0.4f;
+  float lowModel = GetRotationAwareModelBoundingBox(m).min.y;
+  DrawBoundingBox(GetRotationAwareModelBoundingBox(m), RED);
 
   // This means we rest on the tile.
   if (fabs(highTile - lowModel) < 0.05f) {
