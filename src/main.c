@@ -1,8 +1,6 @@
 #include "plane.h"
 #include "raylib.h"
 #include "raymath.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 #define VIEW_ROWS 4
 #define VIEW_COLUMNS 4
@@ -22,10 +20,11 @@ void ApplyPhysics(PlaneView p, Model *m) {
 
 int main(void) {
   int currentMonitor = GetCurrentMonitor();
-  InitWindow(GetMonitorWidth(currentMonitor), GetMonitorHeight(currentMonitor), "untitled.game");
+  InitWindow(GetMonitorWidth(currentMonitor), GetMonitorHeight(currentMonitor),
+             "untitled.game");
   SetTargetFPS(GetMonitorRefreshRate(currentMonitor));
 
-  Model player = LoadModelFromMesh(GenMeshSphere(0.3f, 20, 20));
+  Model player = LoadModelFromMesh(GenMeshSphere(0.1f, 20, 20));
   player.transform = MatrixTranslate(0, 10, 0);
   PlaneView plane = GeneratePlaneView(VIEW_ROWS, VIEW_COLUMNS);
   HeightMap map = GetHeightMap(200, 200);
@@ -35,7 +34,7 @@ int main(void) {
   camera.target = (Vector3){8, 0, 0};
   camera.up = (Vector3){0.0f, 1.0f, 0.0f};
   camera.fovy = 20.0f;
-  camera.projection = CAMERA_ORTHOGRAPHIC;
+  camera.projection = CAMERA_PERSPECTIVE;
 
   while (!WindowShouldClose()) {
     BeginDrawing();
@@ -58,12 +57,12 @@ int main(void) {
     if (IsKeyDown(KEY_K)) {
       player.transform = MatrixMultiply(
           player.transform,
-          MatrixTranslate(0, 0, PLAYER_VELOCITY * GetFrameTime()));
+          MatrixTranslate(0, 0, -PLAYER_VELOCITY * GetFrameTime()));
     }
     if (IsKeyDown(KEY_J)) {
       player.transform = MatrixMultiply(
           player.transform,
-          MatrixTranslate(0, 0, -PLAYER_VELOCITY * GetFrameTime()));
+          MatrixTranslate(0, 0, PLAYER_VELOCITY * GetFrameTime()));
     }
     if (IsKeyDown(KEY_H)) {
       player.transform = MatrixMultiply(
@@ -77,29 +76,28 @@ int main(void) {
     }
 
     DrawModelWires(player, ORIGIN, 1.0f, WHITE);
-    RayCollision collision = GetPlaneCollision(
-        plane, (Vector3){player.transform.m12, player.transform.m13,
-                         player.transform.m14});
+    RayCollision collision =
+        GetPlaneCollision(plane, GetPosition(player.transform));
 
     ApplyPhysics(plane, &player);
 
     DrawPlaneView(&plane, map);
-    // UpdateCamera(&camera, CAMERA_FREE);
+    UpdateCamera(&camera, CAMERA_FREE);
 
     EndMode3D();
     DrawFPS(10, 10);
     DrawText(TextFormat("X: %d Y: %d", plane.offset.column, plane.offset.row),
-             10, 50, 10, WHITE);
+             10, 50, 50, WHITE);
     DrawText(TextFormat("Distance: %f, X: %f, Z: %f", collision.distance,
                         collision.point.x, collision.point.z),
-             10, 70, 10, WHITE);
+             10, 100, 50, WHITE);
     DrawText(TextFormat("Player: X:%f, Y:%f, Z:%f", player.transform.m12,
                         player.transform.m13, player.transform.m14),
-             10, 90, 10, WHITE);
+             10, 150, 50, WHITE);
     DrawText(TextFormat("Height: %f",
                         GetHeightFromMap(map, plane.offset, collision.point.z,
                                          collision.point.x)),
-             10, 110, 10, WHITE);
+             10, 200, 50, WHITE);
     EndDrawing();
   }
 

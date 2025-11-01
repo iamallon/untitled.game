@@ -38,12 +38,15 @@ RayCollision GetPlaneCollision(PlaneView plane, Vector3 origin) {
   Ray ray = {0};
   ray.position = origin;
   ray.direction = VECTOR_DOWN;
+
   DrawRay(ray, RED);
+
   for (int i = 0; i < plane.rowSize; i++) {
     for (int j = 0; j < plane.columnSize; j++) {
       RayCollision col = GetRayCollisionBox(
           ray, GetModelBoundingBox(plane.models[i * plane.columnSize + j]));
       if (col.hit) {
+        col.point = (Vector3){j, col.point.y, i};
         return col;
       }
     }
