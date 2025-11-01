@@ -25,9 +25,9 @@ void DrawPlaneView(PlaneView *plane, HeightMap map) {
   for (int i = 0; i < plane->rowSize; i++) {
     for (int j = 0; j < plane->columnSize; j++) {
       Model *m = &plane->models[i * plane->columnSize + j];
-      // float height = map.heights[((i + plane->offset.row) *
-      // plane->columnSize) + j + plane->offset.column];
       float height = GetHeightFromMap(map, plane->offset, i, j);
+
+      // Apply transform on Y axis.
       m->transform.m13 = Lerp(m->transform.m13, height, 0.1f);
       DrawBoundingBox(GetModelBoundingBox(*m), RED);
     }

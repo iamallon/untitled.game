@@ -1,20 +1,36 @@
 #include "plane.h"
 #include "raylib.h"
 #include "raymath.h"
+#include <math.h>
 
-#define VIEW_ROWS 4
-#define VIEW_COLUMNS 4
-#define GRAVITY 9.8f
+#define VIEW_ROWS 16
+#define VIEW_COLUMNS 16
 #define PLAYER_VELOCITY 3.0f
 
 Vector3 GetPosition(Matrix m) { return (Vector3){m.m12, m.m13, m.m14}; }
 
 void ApplyPhysics(PlaneView p, Model *m) {
   PlaneCollision col = GetWheelPlaneCollision(p, GetPosition(m->transform));
+  float highTile = GetModelBoundingBox(col.tile).max.y;
+  float lowModel = GetModelBoundingBox(*m).min.y;
 
-  if (col.collision.hit && col.collision.distance > 0.8f) {
+  // This means we rest on the tile.
+  if (fabs(highTile - lowModel) < 0.01f) {
+    return;
+  }
+
+  // If there is a gap make the object fall.
+  if (col.collision.hit && highTile < lowModel) {
     m->transform = MatrixMultiply(
-        m->transform, MatrixTranslate(0, -GRAVITY * GetFrameTime(), 0));
+        m->transform, MatrixTranslate(0, -2.0f * GetFrameTime(), 0));
+    return;
+  }
+
+  // If there is a bumo make the object rise slightly.
+  if (col.collision.hit && highTile > lowModel) {
+    m->transform = MatrixMultiply(m->transform,
+                                  MatrixTranslate(0, 1.0f * GetFrameTime(), 0));
+    return;
   }
 }
 

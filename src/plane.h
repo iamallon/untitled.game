@@ -5,6 +5,7 @@
 
 #define ORIGIN (Vector3){0}
 #define VECTOR_DOWN (Vector3){0.0f, -1.0f, 0.0f}
+#define VECTOR_UP (Vector3){0.0f, 1.0f, 0.0f}
 
 typedef struct {
   int row;
