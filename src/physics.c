@@ -5,11 +5,11 @@
 #include "raymath.h"
 #include <math.h>
 
-#define GRAVITY 5.0f
-#define SPRING_FORCE 4.0f
+#define GRAVITY 9.8f
+#define SPRING_FORCE 1.4f
 #define CAR_VELOCITY 3.0f
 
-Vector3 GetPosition(Matrix m) { return (Vector3){m.m12, m.m13, m.m14}; }
+static Vector3 GetPosition(Matrix m) { return (Vector3){m.m12, m.m13, m.m14}; }
 
 static Matrix GetWheelMatrixTranslate(PlaneView p, Model m) {
   PlaneCollision col = GetPlaneCollision(p, GetPosition(m.transform));
@@ -23,13 +23,15 @@ static Matrix GetWheelMatrixTranslate(PlaneView p, Model m) {
 
   // If there is a gap make the object fall.
   if (col.collision.hit && highTile < lowModel) {
-    return MatrixTranslate(0, -GRAVITY * GetFrameTime(), 0);
+    return MatrixTranslate(0, -SPRING_FORCE * CAR_VELOCITY * GetFrameTime(), 0);
   }
 
-  // If there is a bumo make the object rise slightly.
+  // If there is a bump make the object rise slightly.
   if (col.collision.hit && highTile > lowModel) {
-    return MatrixTranslate(0, SPRING_FORCE * GetFrameTime(), 0);
+    return MatrixTranslate(0, SPRING_FORCE * CAR_VELOCITY * GetFrameTime(), 0);
   }
+
+  return MatrixIdentity();
 }
 
 void ApplyCarPhysics(PlaneView p, Car *c) {
@@ -51,40 +53,25 @@ void ApplyCarPhysics(PlaneView p, Car *c) {
   }
 }
 
+// Order is: scale -> rotation -> translation
 void ApplyCarInput(PlaneView p, Car *c) {
   if (IsKeyDown(KEY_H)) {
-    c->body.transform =
-        MatrixMultiply(c->body.transform,
-                       MatrixTranslate(-CAR_VELOCITY * GetFrameTime(), 0, 0));
-    c->wheels[0].transform =
-        MatrixMultiply(c->wheels[0].transform,
-                       MatrixTranslate(-CAR_VELOCITY * GetFrameTime(), 0, 0));
-    c->wheels[1].transform =
-        MatrixMultiply(c->wheels[1].transform,
-                       MatrixTranslate(-CAR_VELOCITY * GetFrameTime(), 0, 0));
-    c->wheels[2].transform =
-        MatrixMultiply(c->wheels[2].transform,
-                       MatrixTranslate(-CAR_VELOCITY * GetFrameTime(), 0, 0));
-    c->wheels[3].transform =
-        MatrixMultiply(c->wheels[3].transform,
-                       MatrixTranslate(-CAR_VELOCITY * GetFrameTime(), 0, 0));
+    Matrix move = MatrixTranslate(-CAR_VELOCITY * GetFrameTime(), 0, 0);
+
+    c->body.transform = MatrixMultiply(c->body.transform, move);
+    c->wheels[0].transform = MatrixMultiply(c->wheels[0].transform, move);
+    c->wheels[1].transform = MatrixMultiply(c->wheels[1].transform, move);
+    c->wheels[2].transform = MatrixMultiply(c->wheels[2].transform, move);
+    c->wheels[3].transform = MatrixMultiply(c->wheels[3].transform, move);
   }
 
   if (IsKeyDown(KEY_L)) {
-    c->body.transform =
-        MatrixMultiply(c->body.transform,
-                       MatrixTranslate(CAR_VELOCITY * GetFrameTime(), 0, 0));
-    c->wheels[0].transform =
-        MatrixMultiply(c->wheels[0].transform,
-                       MatrixTranslate(CAR_VELOCITY * GetFrameTime(), 0, 0));
-    c->wheels[1].transform =
-        MatrixMultiply(c->wheels[1].transform,
-                       MatrixTranslate(CAR_VELOCITY * GetFrameTime(), 0, 0));
-    c->wheels[2].transform =
-        MatrixMultiply(c->wheels[2].transform,
-                       MatrixTranslate(CAR_VELOCITY * GetFrameTime(), 0, 0));
-    c->wheels[3].transform =
-        MatrixMultiply(c->wheels[3].transform,
-                       MatrixTranslate(CAR_VELOCITY * GetFrameTime(), 0, 0));
+    Matrix move = MatrixTranslate(CAR_VELOCITY * GetFrameTime(), 0, 0);
+
+    c->body.transform = MatrixMultiply(c->body.transform, move);
+    c->wheels[0].transform = MatrixMultiply(c->wheels[0].transform, move);
+    c->wheels[1].transform = MatrixMultiply(c->wheels[1].transform, move);
+    c->wheels[2].transform = MatrixMultiply(c->wheels[2].transform, move);
+    c->wheels[3].transform = MatrixMultiply(c->wheels[3].transform, move);
   }
 }

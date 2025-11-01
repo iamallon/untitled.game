@@ -7,15 +7,15 @@ Car GenerateCar(Model body) {
   Car car = {0};
 
   car.body = body;
-  car.body.transform = MatrixTranslate(9, 11, 11);
+  car.body.transform = MatrixTranslate(9, 2, 11);
   car.wheels[0] = LoadModelFromMesh(GenMeshTorus(1.0f, 0.4f, 16, 32));
-  car.wheels[0].transform = MatrixTranslate(10, 10, 10);
+  car.wheels[0].transform = MatrixTranslate(10, 0, 10);
   car.wheels[1] = LoadModelFromMesh(GenMeshTorus(1.0f, 0.4f, 16, 32));
-  car.wheels[1].transform = MatrixTranslate(10, 10, 12);
+  car.wheels[1].transform = MatrixTranslate(10, 0, 12);
   car.wheels[2] = LoadModelFromMesh(GenMeshTorus(1.0f, 0.4f, 16, 32));
-  car.wheels[2].transform = MatrixTranslate(8, 10, 10);
+  car.wheels[2].transform = MatrixTranslate(8, 0, 10);
   car.wheels[3] = LoadModelFromMesh(GenMeshTorus(1.0f, 0.4f, 16, 32));
-  car.wheels[3].transform = MatrixTranslate(8, 10, 12);
+  car.wheels[3].transform = MatrixTranslate(8, 0, 12);
 
   return car;
 }

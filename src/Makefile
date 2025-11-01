@@ -1,7 +1,7 @@
 CC = c99
 CFLAGS = -O2 -I/opt/homebrew/Cellar/raylib/5.5/include
 LDFLAGS = -L/opt/homebrew/Cellar/raylib/5.5/lib
-LDLIBS = -lraylib
+LDLIBS = -lraylib -lm
 
 all: untitled.game.a
 
