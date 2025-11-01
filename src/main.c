@@ -21,8 +21,9 @@ void ApplyPhysics(PlaneView p, Model *m) {
 }
 
 int main(void) {
-  InitWindow(1280, 720, "untitled.game");
-  SetTargetFPS(60);
+  int currentMonitor = GetCurrentMonitor();
+  InitWindow(GetMonitorWidth(currentMonitor), GetMonitorHeight(currentMonitor), "untitled.game");
+  SetTargetFPS(GetMonitorRefreshRate(currentMonitor));
 
   Model player = LoadModelFromMesh(GenMeshSphere(0.3f, 20, 20));
   player.transform = MatrixTranslate(0, 10, 0);
@@ -34,11 +35,10 @@ int main(void) {
   camera.target = (Vector3){8, 0, 0};
   camera.up = (Vector3){0.0f, 1.0f, 0.0f};
   camera.fovy = 20.0f;
-  camera.projection = CAMERA_PERSPECTIVE;
+  camera.projection = CAMERA_ORTHOGRAPHIC;
 
   while (!WindowShouldClose()) {
     BeginDrawing();
-    DisableCursor();
     ClearBackground(BLANK);
     BeginMode3D(camera);
 
@@ -84,7 +84,7 @@ int main(void) {
     ApplyPhysics(plane, &player);
 
     DrawPlaneView(&plane, map);
-    UpdateCamera(&camera, CAMERA_FREE);
+    // UpdateCamera(&camera, CAMERA_FREE);
 
     EndMode3D();
     DrawFPS(10, 10);
